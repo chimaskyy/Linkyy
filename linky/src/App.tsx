@@ -13,8 +13,12 @@ import ProfilePage from "./pages/dashboard/profile"
 import PasswordsPage from "./pages/dashboard/passwords"
 import ShortUrlRedirect from "./pages/short-url-redirect"
 import LinkTreePage from "./pages/link-tree"
+import LinkTreeForm from "./pages/link-tree/CreateTree"
 import { useAuth } from "./contexts/auth-context"
-import EditLinkTreePage from "./pages/dashboard/editLinkTree"
+// import EditLinkTreePage from "./pages/dashboard/editLinkTree"
+// import NewLinkTreePage from "./components/link-tree-form"
+
+
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth()
@@ -40,8 +44,9 @@ function AppRoutes() {
       <Route path="/" element={<HomePage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<LoginPage />} />
-      <Route path="c/:code" element={<ShortUrlRedirect />} />
-      <Route path="/:username" element={<LinkTreePage />} />
+      <Route path="/new-link-tree" element={<LinkTreeForm />} />
+      <Route path="/:code" element={<ShortUrlRedirect />} />
+      <Route path="/t/:username" element={<LinkTreePage />} />
 
       {/* Protected routes */}
       <Route
@@ -72,7 +77,7 @@ function AppRoutes() {
         path="/linktree/:id"
         element={
           <ProtectedRoute>
-            <EditLinkTreePage />
+            <LinkTreeForm />
           </ProtectedRoute>
         }
       />

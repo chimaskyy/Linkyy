@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card"
 import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
-import { Eye, EyeOff, Copy, Trash2, Search } from "lucide-react"
+import { Eye, EyeOff, Copy, Trash2} from "lucide-react"
 import { useToast } from "../../hooks/use-toast"
 import { supabase } from "../../lib/supabase"
 import { useAuth } from "../../contexts/auth-context"
@@ -57,7 +57,7 @@ export default function PasswordsPage() {
         }))
     }
 
-    const copyPassword = (id: string, encryptedPassword: string) => {
+    const copyPassword = (encryptedPassword: string) => {
         if (!user) return
 
         try {
@@ -123,15 +123,7 @@ export default function PasswordsPage() {
                             <CardTitle className="text-xl text-center">Your Passwords Vault</CardTitle>
                             <CardDescription>All your saved passwords will be listed here</CardDescription>
                         </div>
-                        {/* <div className="relative w-64">
-                            <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
-                            <Input
-                                placeholder="Search passwords..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="pl-8 bg-gray-800 border-gray-700"
-                            />
-                        </div> */}
+                        
                     </CardHeader>
                     <CardContent>
                         {loading ? (
@@ -163,7 +155,7 @@ export default function PasswordsPage() {
                                                     {visiblePasswords[password.id] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                                                 </button>
                                                 <button
-                                                    onClick={() => copyPassword(password.id, password.encrypted_password)}
+                                                    onClick={() => copyPassword(password.encrypted_password)}
                                                     className="text-gray-400 hover:text-white p-1"
                                                     aria-label="Copy password"
                                                 >

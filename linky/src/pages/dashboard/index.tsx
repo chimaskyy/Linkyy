@@ -8,10 +8,6 @@ import DashboardLayout from "../../components/dashboard-layout"
 import { LoadingSpinner } from "../../components/LoadingSpinner"
 import { StatsCard } from "../../components/dashboard/StatsCard"
 import { RecentItemsCard } from "../../components/dashboard/RecentItemCard"
-import { CreationTabs } from "../../components/dashboard/CreationTabs"
-import { UrlShortenerForm } from "../../components/url-shortener-form"
-import { LinkTreeForm } from "../../components/link-tree-form"
-import { PasswordGeneratorForm } from "../../components/password-generator-form"
 
 export default function DashboardPage() {
   const { user } = useAuth()
@@ -155,55 +151,37 @@ export default function DashboardPage() {
     </div>
   )
 
-  const creationTabs = [
-    {
-      value: "url",
-      label: "Shorten URL",
-      content: <UrlShortenerForm />
-    },
-    {
-      value: "linktree",
-      label: "Create Link Tree",
-      content: <LinkTreeForm />
-    },
-    {
-      value: "password",
-      label: "Generate Password",
-      content: <PasswordGeneratorForm />
-    }
-  ]
-
   return (
     <DashboardLayout>
       <div className="space-y-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatsCard
             icon={<Link2 className="h-5 w-5 mr-2 text-purple-400" />}
-            title="Total URLs"
+           
             value={urlCount || 0}
             description="Total URLs"
           />
           <StatsCard
             icon={<ExternalLink className="h-5 w-5 mr-2 text-purple-400" />}
-            title="Total Link Trees"
+            
             value={linkTreeCount || 0}
             description="Total Link Trees"
           />
           <StatsCard
             icon={<Key className="h-5 w-5 mr-2 text-purple-400" />}
-            title="Saved Passwords"
+           
             value={passwordCount || 0}
             description="Saved Passwords"
           />
           <StatsCard
             icon={<BarChart className="h-5 w-5 mr-2 text-purple-400" />}
-            title="Total Clicks"
+            
             value={totalClickCount}
             description="Total Clicks"
           />
         </div>
 
-        <CreationTabs tabs={creationTabs} defaultValue="url" />
+        {/* <CreationTabs tabs={creationTabs} defaultValue="url" /> */}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <RecentItemsCard

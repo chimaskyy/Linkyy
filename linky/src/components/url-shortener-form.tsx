@@ -1,5 +1,3 @@
-"use client"
-
 import type React from "react"
 import { useState } from "react"
 import { Button } from "../components/ui/button"
@@ -11,7 +9,19 @@ import { supabase } from "../lib/supabase"
 import { useAuth } from "../contexts/auth-context"
 import { generateShortCode } from "../lib/utils"
 
-export function UrlShortenerForm() {
+interface UrlShortenerFormProps {
+  onSuccess?: (newUrl: {
+    id: string;
+    user_id: string;
+    original_url: string;
+    short_code: string;
+    title: string;
+    clicks: number;
+    created_at: string;
+  }) => void;
+}
+
+export function UrlShortenerForm({ onSuccess }: UrlShortenerFormProps) {
   const [url, setUrl] = useState("")
   const [title, setTitle] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -75,6 +85,14 @@ export function UrlShortenerForm() {
         }
       }
 
+      //reset form fields
+      const resetForm = () => {
+        setUrl("")
+        setTitle("")
+        setShortUrl(null)
+        setCopied(false)
+      }
+
       // Insert the new URL
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { data, error } = await supabase
@@ -99,6 +117,14 @@ export function UrlShortenerForm() {
         title: "Success!",
         description: "Your URL has been shortened",
       })
+
+      if (onSuccess && data) {
+        onSuccess(data)
+      }
+
+      // Reset form fields
+      resetForm()
+
     } catch (error) {
       console.error("Error shortening URL:", error)
       toast({
@@ -110,6 +136,9 @@ export function UrlShortenerForm() {
       setIsLoading(false)
     }
   }
+
+  
+
 
   const copyToClipboard = () => {
     if (shortUrl) {

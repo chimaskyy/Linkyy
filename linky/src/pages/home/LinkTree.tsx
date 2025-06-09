@@ -58,7 +58,7 @@ function LinkTree() {
             </div>
             <Button
                 className="w-full bg-purple-600 hover:bg-purple-700 mt-4"
-                onClick={() => handleGetStarted("linktrees")}
+                onClick={() => handleGetStarted("new-link-tree")}
             >
                 Get Started
             </Button>
