@@ -15,7 +15,7 @@ function Header() {
                           <div className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center">
                               <div className="h-6 w-6 rounded-full bg-purple-600"></div>
                           </div>
-                          <span className="text-xl font-bold">Linky</span>
+                          <span className="text-xl font-bold">Snipy</span>
                       </Link>
                   </div>
 

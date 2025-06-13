@@ -29,7 +29,7 @@ export function LinkTreePreview({ username, title, bio, theme, avatarUrl, links,
                 <CardDescription>
                     {isEditing ? (
                         <Link
-                            to={`/t/${username}`}
+                            to={`/tree/${username}`}
                             target="_blank"
                             className="text-purple-400 hover:text-purple-300 flex items-center"
                         >

@@ -187,7 +187,7 @@ export default function ProfilePage() {
                                         className="bg-gray-800 border-gray-700"
                                     />
                                     <p className="text-xs text-gray-400">
-                                        This will be used for your link tree URL: {window.location.origin}/t/{username || "username"}
+                                        This will be used for your link tree URL: {window.location.origin}/tree/{username || "username"}
                                     </p>
                                 </div>
 

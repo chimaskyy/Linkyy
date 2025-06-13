@@ -15,8 +15,8 @@ export default defineConfig({
       
       filename: "sw.js",
       manifest: {
-        name: "Linky",
-        short_name: "Linky",
+        name: "Snipy",
+        short_name: "Snipy",
         start_url: "/",
         description: "Your all-in-one link management solution",
         theme_color: "#ffffff",

@@ -1,8 +1,7 @@
 import type React from "react"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { Button } from "../../components/ui/button"
-import { useToast } from "../../hooks/use-toast"
 import { supabase } from "../../lib/supabase"
 import { useAuth } from "../../contexts/auth-context"
 import { Link, useNavigate, useParams } from "react-router-dom"
@@ -12,6 +11,7 @@ import { BasicInfoForm } from "./BasicInfo"
 import { AvatarUpload } from "./AvatarUpload"
 import { SocialLinks } from "./SocialLinks"
 import { LinkTreePreview } from "./TreePreview"
+import toast from "react-hot-toast"
 
 interface LinkTreeLink {
     id?: string
@@ -36,12 +36,11 @@ interface LinkTree {
 const LinkTreeForm = () => {
     const { id } = useParams<{ id: string }>()
     const navigate = useNavigate()
-    const { toast } = useToast()
     const { user } = useAuth()
-    const [loading, setLoading] = useState(!!id)
     const [saving, setSaving] = useState(false)
     const [linkTree, setLinkTree] = useState<LinkTree | null>(null)
     const [links, setLinks] = useState<LinkTreeLink[]>([])
+    const [isInitialized, setIsInitialized] = useState(false)
 
     // Form state
     const [username, setUsername] = useState("")
@@ -52,70 +51,158 @@ const LinkTreeForm = () => {
     const [treeUrl, setTreeUrl] = useState<string | null>(null)
     const [copied, setCopied] = useState(false)
 
-    useEffect(() => {
-        if (!id) {
-            setLinks([{ title: "", url: "", icon: "external", position: 0 }])
-            return
+    const sessionStorageKey = `linktree-${user?.id}`;
+    const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    // Debounced save to prevent excessive writes
+    const debouncedSave = (formData: any) => {
+        if (saveTimeoutRef.current) {
+            clearTimeout(saveTimeoutRef.current);
         }
 
-        const fetchLinkTree = async () => {
-            if (!user) return
-
-            try {
-                const { data: linkTreeData, error: linkTreeError } = await supabase
-                    .from("link_trees")
-                    .select("*")
-                    .eq("id", id)
-                    .eq("user_id", user.id)
-                    .single()
-
-                if (linkTreeError) throw linkTreeError
-
-                if (!linkTreeData) {
-                    toast({
-                        title: "Error",
-                        description: "Link tree not found",
-                        variant: "destructive",
-                    })
-                    navigate("/linktrees")
-                    return
-                }
-
-                setLinkTree(linkTreeData)
-                setTitle(linkTreeData.title || "")
-                setBio(linkTreeData.bio || "")
-                setTheme(linkTreeData.theme || "dark")
-                setUsername(linkTreeData.username || "")
-                setAvatarUrl(linkTreeData.avatar_url)
-                setTreeUrl(`${window.location.origin}/t/${linkTreeData.username}`)
-
-                const { data: linksData, error: linksError } = await supabase
-                    .from("tree_links")
-                    .select("*")
-                    .eq("tree_id", id)
-                    .order("position", { ascending: true })
-
-                if (linksError) throw linksError
-
-                setLinks(linksData?.length ? linksData : [{ title: "", url: "", icon: "external", position: 0 }])
-            } catch (error) {
-                console.error("Error fetching link tree:", error)
-                toast({
-                    title: "Error",
-                    description: "Failed to load link tree",
-                    variant: "destructive",
-                })
-                navigate("/linktrees")
-            } finally {
-                setLoading(false)
+        saveTimeoutRef.current = setTimeout(() => {
+            if (!id && user && isInitialized) {
+                sessionStorage.setItem(sessionStorageKey, JSON.stringify(formData));
             }
-        }
+        }, 500); // Wait 500ms after last change
+    };
 
-        fetchLinkTree()
-    }, [id, user, toast, navigate])
+    // 1. Initialize form - runs once when component mounts
+    useEffect(() => {
+        if (!user) return;
+
+        const initializeForm = async () => {
+            if (id) {
+                // Load existing tree
+                await loadExistingTree();
+            } else {
+                // Load from session storage or initialize empty
+                loadFromSessionStorage();
+            }
+            setIsInitialized(true);
+        };
+
+        initializeForm();
+    }, [id, user?.id]); // Only depend on id and user.id
+
+    //Save draft effect - only runs after initialization
+    useEffect(() => {
+        if (!isInitialized || !user || id) return;
+
+        const formData = {
+            title,
+            bio,
+            theme,
+            username,
+            avatarUrl,
+            links: links.map(link => ({
+                ...link,
+                id: link.id?.startsWith('temp-') ? undefined : link.id
+            }))
+        };
+
+        debouncedSave(formData);
+    }, [title, bio, theme, username, avatarUrl, links, isInitialized, user, id]);
+
+    const loadFromSessionStorage = () => {
+        const saved = sessionStorage.getItem(sessionStorageKey);
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+
+                setUsername(data.username || '');
+                setTitle(data.title || '');
+                setBio(data.bio || '');
+                setTheme(data.theme || 'dark');
+                setAvatarUrl(data.avatarUrl || null);
+
+                const loadedLinks = Array.isArray(data.links) && data.links.length > 0
+                    ? data.links.map((link: any, index: number) => ({
+                        ...link,
+                        position: link.position ?? index,
+                        id: link.id || `temp-${Date.now()}-${index}`
+                    }))
+                    : [{ title: "", url: "", icon: "external", position: 0, id: `temp-${Date.now()}-0` }];
+
+                setLinks(loadedLinks);
+            } catch (error) {
+                console.warn('Failed to load saved data:', error);
+                initializeEmptyForm();
+            }
+        } else {
+            initializeEmptyForm();
+        }
+    };
+
+    const initializeEmptyForm = () => {
+        setUsername('');
+        setTitle('');
+        setBio('');
+        setTheme('dark');
+        setAvatarUrl(null);
+        setLinks([{ title: "", url: "", icon: "external", position: 0, id: `temp-${Date.now()}-0` }]);
+    };
+
+    const loadExistingTree = async () => {
+        if (!id || !user) return;
+
+        try {
+            const { data: linkTreeData, error: linkTreeError } = await supabase
+                .from("link_trees")
+                .select("*")
+                .eq("id", id)
+                .eq("user_id", user.id)
+                .single();
+
+            if (linkTreeError) throw linkTreeError;
+            if (!linkTreeData) {
+                toast.error("Link tree not found");
+                navigate("/linktrees");
+                return;
+            }
+
+            // Clear any existing draft when loading an existing tree
+            sessionStorage.removeItem(sessionStorageKey);
+
+            setLinkTree(linkTreeData);
+            setTitle(linkTreeData.title || "");
+            setBio(linkTreeData.bio || "");
+            setTheme(linkTreeData.theme || "dark");
+            setUsername(linkTreeData.username || "");
+            setAvatarUrl(linkTreeData.avatar_url);
+            setTreeUrl(`${window.location.origin}/tree/${linkTreeData.username}`);
+
+            const { data: linksData, error: linksError } = await supabase
+                .from("tree_links")
+                .select("*")
+                .eq("tree_id", id)
+                .order("position", { ascending: true });
+
+            if (linksError) throw linksError;
+
+            const loadedLinks = linksData?.length
+                ? linksData.map(link => ({ ...link, id: link.id || `temp-${Date.now()}-${link.position}` }))
+                : [{ title: "", url: "", icon: "external", position: 0, id: `temp-${Date.now()}-0` }];
+
+            setLinks(loadedLinks);
+        } catch (error) {
+            console.error("Error fetching link tree:", error);
+            toast.error("Failed to load link tree");
+            navigate("/linktrees");
+        }
+    };
 
     const addLink = () => {
-        setLinks([...links, { title: "", url: "", icon: "external", position: links.length }])
+        setLinks(prevLinks => [
+            ...prevLinks,
+            {
+                title: "",
+                url: "",
+                icon: "external",
+                position: prevLinks.length,
+                id: `temp-${Date.now()}-${prevLinks.length}`
+            }
+        ]);
     }
 
     const updateLink = (index: number, field: keyof LinkTreeLink, value: string) => {
@@ -126,7 +213,7 @@ const LinkTreeForm = () => {
 
     const removeLink = (index: number) => {
         if (links.length === 1) {
-            setLinks([{ title: "", url: "", icon: "external", position: 0 }])
+            setLinks([{ title: "", url: "", icon: "external", position: 0, id: `temp-${Date.now()}-0` }])
         } else {
             setLinks(links.filter((_, i) => i !== index))
         }
@@ -147,33 +234,30 @@ const LinkTreeForm = () => {
         setLinks(reorderedLinks)
     }
 
+    const clearDraft = () => {
+        if (user) {
+            sessionStorage.removeItem(`linktree-${user.id}`);
+            if (saveTimeoutRef.current) {
+                clearTimeout(saveTimeoutRef.current);
+            }
+        }
+    };
+
     const saveLinkTree = async (e?: React.FormEvent) => {
         e?.preventDefault()
 
         if (!username) {
-            toast({
-                title: "Error",
-                description: "Please enter a username",
-                variant: "destructive",
-            })
+            toast.error("Please enter a username")
             return
         }
 
         if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-            toast({
-                title: "Invalid Username",
-                description: "Username can only contain letters, numbers, and underscores",
-                variant: "destructive",
-            })
+            toast.error("Username can only contain letters, numbers, and underscores")
             return
         }
 
         if (!user) {
-            toast({
-                title: "Error",
-                description: "You must be logged in to create a link tree",
-                variant: "destructive",
-            })
+            toast.error("You must be logged in to create a link tree")
             return
         }
 
@@ -189,11 +273,7 @@ const LinkTreeForm = () => {
                     .single()
 
                 if (existingTree) {
-                    toast({
-                        title: "Error",
-                        description: "Username is already taken",
-                        variant: "destructive",
-                    })
+                    toast.error("Username is already taken")
                     setSaving(false)
                     return
                 }
@@ -257,22 +337,13 @@ const LinkTreeForm = () => {
                     if (error) throw error
                 }
             }
+            clearDraft()
 
-            toast({
-                title: "Success!",
-                description: `Link tree has been ${id ? "updated" : "created"}`,
-            })
+            toast.success(`Link tree ${id ? "updated" : "created"} successfully!`)
 
-            // if (!id) {
-            //     navigate(`/linktrees/${linkTreeId}`)
-            // }
         } catch (error) {
             console.error("Error saving link tree:", error)
-            toast({
-                title: "Error",
-                description: error instanceof Error ? error.message : `Failed to ${id ? "update" : "create"} link tree`,
-                variant: "destructive",
-            })
+            toast.error(error instanceof Error ? error.message : `Failed to ${id ? "update" : "create"} link tree`)
         } finally {
             setSaving(false)
         }
@@ -283,22 +354,18 @@ const LinkTreeForm = () => {
             navigator.clipboard.writeText(treeUrl)
             setCopied(true)
             setTimeout(() => setCopied(false), 2000)
-            toast({
-                title: "Copied!",
-                description: "Link tree URL copied to clipboard",
-            })
+            toast.success("Link tree URL copied to clipboard")
         }
     }
 
-    if (loading) {
-        return (
-            <DashboardLayout>
-                <div className="flex justify-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500"></div>
-                </div>
-            </DashboardLayout>
-        )
-    }
+    // Cleanup timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (saveTimeoutRef.current) {
+                clearTimeout(saveTimeoutRef.current);
+            }
+        };
+    }, []);
 
     return (
         <DashboardLayout>
@@ -327,7 +394,6 @@ const LinkTreeForm = () => {
                             onBioChange={setBio}
                             onThemeChange={setTheme}
                         />
-
 
                         <SocialLinks
                             links={links}

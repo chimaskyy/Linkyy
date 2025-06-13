@@ -5,11 +5,11 @@ import { Button } from "../components/ui/button"
 import { Input } from "../components/ui/input"
 import { Label } from "../components/ui/label"
 import { Card, CardContent } from "../components/ui/card"
-import { useToast } from "../hooks/use-toast"
 import { supabase } from "../lib/supabase"
 import { useAuth } from "../contexts/auth-context"
 import { Download, Copy, Check, QrCode } from 'lucide-react'
 import QRCode from "qrcode"
+import toast from "react-hot-toast"
 
 interface QRCodeData {
     id: string
@@ -22,7 +22,6 @@ interface QRCodeData {
 }
 
 const QRCodeGeneratorForm = () => {
-    const { toast } = useToast()
     const { user } = useAuth()
     const [loading, setLoading] = useState(false)
     const [url, setUrl] = useState("")
@@ -37,20 +36,12 @@ const QRCodeGeneratorForm = () => {
         e.preventDefault()
 
         if (!url.trim()) {
-            toast({
-                title: "Error",
-                description: "Please enter a URL",
-                variant: "destructive",
-            })
+            toast.error("Please enter a URL")
             return
         }
 
         if (!tag.trim()) {
-            toast({
-                title: "Error",
-                description: "Please enter a tag name",
-                variant: "destructive",
-            })
+            toast.error("Please enter a tag name")
             return
         }
 
@@ -58,11 +49,7 @@ const QRCodeGeneratorForm = () => {
         try {
             new URL(url)
         } catch {
-            toast({
-                title: "Error",
-                description: "Please enter a valid URL",
-                variant: "destructive",
-            })
+            toast.error("Please enter a valid URL")
             return
         }
 
@@ -98,10 +85,7 @@ const QRCodeGeneratorForm = () => {
                 if (error) throw error
 
                 setGeneratedQR(data)
-                toast({
-                    title: "QR Code Generated!",
-                    description: "Your QR code has been created and saved",
-                })
+                toast.success("Your QR code has been created and saved")
             } else {
                 // For non-logged in users, just show the QR code
                 setGeneratedQR({
@@ -113,18 +97,11 @@ const QRCodeGeneratorForm = () => {
                     foreground_color: foregroundColor,
                     background_color: backgroundColor,
                 })
-                toast({
-                    title: "QR Code Generated!",
-                    description: "Sign in to save your QR codes",
-                })
+                toast.success("Your QR code has been generated")
             }
         } catch (error) {
             console.error("Error generating QR code:", error)
-            toast({
-                title: "Error",
-                description: "Failed to generate QR code",
-                variant: "destructive",
-            })
+            toast.error("Failed to generate QR code")
         } finally {
             setLoading(false)
         }
@@ -149,10 +126,7 @@ const QRCodeGeneratorForm = () => {
                 .then(() => { })
         }
 
-        toast({
-            title: "Downloaded!",
-            description: "QR code has been downloaded as PNG",
-        })
+        toast.success("QR code has been downloaded as PNG")
     }
 
     const copyUrl = () => {
@@ -160,10 +134,7 @@ const QRCodeGeneratorForm = () => {
             navigator.clipboard.writeText(generatedQR.url)
             setCopied(true)
             setTimeout(() => setCopied(false), 2000)
-            toast({
-                title: "Copied!",
-                description: "URL copied to clipboard",
-            })
+            toast.success("URL copied to clipboard")
         }
     }
 

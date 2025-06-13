@@ -161,7 +161,7 @@ export default function LinkTreePage() {
           <p className={`text-sm ${linkTree.theme === "dark" ? "text-gray-500" : "text-gray-400"}`}>
             Powered by{" "}
             <Link to="/" className="text-purple-500 hover:text-purple-400">
-              Linky
+              Snipy
             </Link>
           </p>
         </div>

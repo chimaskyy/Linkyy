@@ -9,7 +9,7 @@ export default function LoginPage() {
           <div className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center mr-2">
             <div className="h-6 w-6 rounded-full bg-purple-600"></div>
           </div>
-          <h1 className="text-3xl font-bold text-center">Linky</h1>
+          <h1 className="text-3xl font-bold text-center">Snipy</h1>
         </Link>
         <AuthForm />
       </div>

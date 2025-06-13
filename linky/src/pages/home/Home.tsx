@@ -48,7 +48,7 @@ const Logo = ({ className = "" }) => (
         <div className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center" aria-hidden="true">
             <div className="h-6 w-6 rounded-full bg-purple-600"></div>
         </div>
-        <span className="text-xl font-bold">Linky</span>
+        <span className="text-xl font-bold">Snipy</span>
     </div>
 )
 
@@ -178,7 +178,7 @@ export default function HomePage() {
                             Simplify your online presence
                         </h1>
                         <p className="text-gray-400 text-sm md:text-lg mb-10 max-w-2xl mx-auto">
-                            Linky is your all-in-one tool for shortening URLs, creating beautiful link trees, and generating secure
+                            Snipy is your all-in-one tool for shortening URLs, creating beautiful link trees, and generating secure
                             passwords. Manage your links effortlessly and enhance your online presence.
                         </p>
                     </section>
@@ -241,7 +241,7 @@ export default function HomePage() {
                     <div className="flex flex-col md:flex-row justify-between items-center">
                         <Logo />
                         <div className="mt-8 md:mt-0 text-center md:text-left text-gray-500 text-sm">
-                            <p>© {new Date().getFullYear()} Linky. All rights reserved.</p>
+                            <p>© {new Date().getFullYear()} Snipy. All rights reserved.</p>
                         </div>
                     </div>
                 </div>
