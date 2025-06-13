@@ -387,11 +387,10 @@ const LinkTreeForm = () => {
                         <BasicInfoForm
                             username={username}
                             title={title}
-                            bio={bio}
                             theme={theme}
                             onUsernameChange={setUsername}
                             onTitleChange={setTitle}
-                            onBioChange={setBio}
+
                             onThemeChange={setTheme}
                         />
 

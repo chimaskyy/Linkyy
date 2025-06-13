@@ -1,5 +1,4 @@
 import { Input } from "../../components/ui/input"
-import { Textarea } from "../../components/ui/textarea"
 import { Label } from "../../components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../components/ui/card"
 import { ExternalLink } from "lucide-react"
@@ -7,22 +6,18 @@ import { ExternalLink } from "lucide-react"
 interface BasicInfoFormProps {
     username: string
     title: string
-    bio: string
     theme: string
     onUsernameChange: (value: string) => void
     onTitleChange: (value: string) => void
-    onBioChange: (value: string) => void
     onThemeChange: (value: string) => void
 }
 
 export function BasicInfoForm({
     username,
     title,
-    bio,
     theme,
     onUsernameChange,
     onTitleChange,
-    onBioChange,
     onThemeChange,
 }: BasicInfoFormProps) {
     return (
@@ -49,7 +44,7 @@ export function BasicInfoForm({
                         />
                     </div>
                     <p className="text-xs text-gray-400">
-                        Your link tree will be available at {window.location.origin}/t/{username}
+                        Your link tree will be available at {window.location.origin}/tree/{username}
                     </p>
                 </div>
 
@@ -65,7 +60,7 @@ export function BasicInfoForm({
                     />
                 </div>
 
-                <div className="space-y-2">
+                {/* <div className="space-y-2">
                     <Label htmlFor="bio">Bio</Label>
                     <Textarea
                         id="bio"
@@ -74,7 +69,7 @@ export function BasicInfoForm({
                         onChange={(e) => onBioChange(e.target.value)}
                         className="bg-gray-800/50 border-gray-700 text-white"
                     />
-                </div>
+                </div> */}
 
                 <div className="space-y-2">
                     <Label htmlFor="theme">Theme</Label>

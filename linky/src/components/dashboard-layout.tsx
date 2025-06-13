@@ -44,7 +44,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <div className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center">
                 <div className="h-6 w-6 rounded-full bg-purple-900"></div>
               </div>
-              <span className="text-xl font-bold">Snipyy</span>
+              <span className="text-xl font-bold">Snipy</span>
             </Link>
             <button onClick={toggleMobileMenu} className="p-2 rounded-md hover:bg-gray-800">
               {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
