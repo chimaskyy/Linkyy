@@ -19,9 +19,17 @@ interface UrlShortenerFormProps {
     clicks: number;
     created_at: string;
   }) => void;
+  theme?: 'light' | 'dark';
+  requireTitle?: boolean;
+  buttonVariant?: 'default' | 'purple' | 'outline';
 }
 
-export function UrlShortenerForm({ onSuccess }: UrlShortenerFormProps) {
+const UrlShortenerForm = ({
+  onSuccess,
+  theme = 'light',
+  requireTitle = false,
+  buttonVariant = 'purple'
+}: UrlShortenerFormProps) => {
   const [url, setUrl] = useState("")
   const [title, setTitle] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -30,10 +38,31 @@ export function UrlShortenerForm({ onSuccess }: UrlShortenerFormProps) {
   const { toast } = useToast()
   const { user } = useAuth()
 
+  // Theme classes
+  const inputClasses = theme === 'dark'
+    ? "bg-gray-800/50 border-gray-700 text-gray-200 focus:border-purple-500 focus:ring-purple-500"
+    : "bg-gray-50 border-gray-300 text-gray-900 focus:border-purple-500 focus:ring-purple-500"
+
+  const resultClasses = theme === 'dark'
+    ? "bg-gray-800/50 border-gray-700"
+    : "bg-gray-100 border-gray-300"
+
+  const linkColor = theme === 'dark' ? "text-purple-400 hover:text-purple-300" : "text-blue-400 hover:text-blue-300"
+
+  const buttonClasses = {
+    default: "",
+    purple: theme === 'dark'
+      ? "bg-purple-900 hover:opacity-80 text-white"
+      : "bg-purple-900 hover:opacity-80 text-white",
+    outline: theme === 'dark'
+      ? "border-gray-700 text-gray-200 hover:bg-gray-700"
+      : "border-gray-300 text-gray-700 hover:bg-gray-200"
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if(!title) {
+    if (requireTitle && !title) {
       toast({
         title: "Error",
         description: "Please enter a title for your link",
@@ -41,6 +70,7 @@ export function UrlShortenerForm({ onSuccess }: UrlShortenerFormProps) {
       })
       return
     }
+
     if (!url) {
       toast({
         title: "Error",
@@ -71,30 +101,15 @@ export function UrlShortenerForm({ onSuccess }: UrlShortenerFormProps) {
     setIsLoading(true)
 
     try {
-      // Generate a unique short code
       let shortCode = generateShortCode(4)
       let isUnique = false
 
       while (!isUnique) {
         const { data } = await supabase.from("urls").select("short_code").eq("short_code", shortCode).single()
-
-        if (!data) {
-          isUnique = true
-        } else {
-          shortCode = generateShortCode(4)
-        }
+        if (!data) isUnique = true
+        else shortCode = generateShortCode(4)
       }
 
-      //reset form fields
-      const resetForm = () => {
-        setUrl("")
-        setTitle("")
-        setShortUrl(null)
-        setCopied(false)
-      }
-
-      // Insert the new URL
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { data, error } = await supabase
         .from("urls")
         .insert({
@@ -106,9 +121,7 @@ export function UrlShortenerForm({ onSuccess }: UrlShortenerFormProps) {
         .select()
         .single()
 
-      if (error) {
-        throw error
-      }
+      if (error) throw error
 
       const baseUrl = window.location.origin
       setShortUrl(`${baseUrl}/${shortCode}`)
@@ -118,12 +131,9 @@ export function UrlShortenerForm({ onSuccess }: UrlShortenerFormProps) {
         description: "Your URL has been shortened",
       })
 
-      if (onSuccess && data) {
-        onSuccess(data)
-      }
+      if (onSuccess && data) onSuccess(data)
 
-      // Reset form fields
-      resetForm()
+      
 
     } catch (error) {
       console.error("Error shortening URL:", error)
@@ -136,9 +146,6 @@ export function UrlShortenerForm({ onSuccess }: UrlShortenerFormProps) {
       setIsLoading(false)
     }
   }
-
-  
-
 
   const copyToClipboard = () => {
     if (shortUrl) {
@@ -159,10 +166,10 @@ export function UrlShortenerForm({ onSuccess }: UrlShortenerFormProps) {
           <div className="space-y-2">
             <Input
               type="text"
-              placeholder="Link title (eg. My Website)"
+              placeholder={requireTitle ? "Link title (eg. My Website)" : "Link title (optional)"}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="bg-gray-800/50 border-gray-700 text-gray-500 h-12 w-full focus:border-purple-500 focus:ring-purple-500"
+              className={`${inputClasses} h-12 w-full`}
             />
           </div>
           <div className="flex flex-col sm:flex-row items-center">
@@ -175,12 +182,12 @@ export function UrlShortenerForm({ onSuccess }: UrlShortenerFormProps) {
                 placeholder="Paste your link"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
-                className="pl-10 bg-gray-800/50 border-gray-700 text-gray-500 h-12 w-full focus:border-purple-500 focus:ring-purple-500"
+                className={`${inputClasses} pl-10 h-12 w-full`}
               />
             </div>
             <Button
               type="submit"
-              className="bg-purple-600 hover:bg-purple-700 text-white h-12 px-6 w-full sm:w-auto"
+              className={`${buttonClasses[buttonVariant]} h-12 px-6 w-full sm:w-auto`}
               disabled={isLoading}
             >
               {isLoading ? "Shortening..." : "Shorten link"}
@@ -190,14 +197,14 @@ export function UrlShortenerForm({ onSuccess }: UrlShortenerFormProps) {
       </form>
 
       {shortUrl && (
-        <div className="mt-4 p-4 bg-gray-800/50 rounded-lg border border-gray-700 flex flex-col sm:flex-row items-center justify-between">
+        <div className={`mt-4 p-4 rounded-lg border flex flex-col sm:flex-row items-center justify-between ${resultClasses}`}>
           <div className="mb-3 sm:mb-0 truncate max-w-full sm:max-w-[70%]">
             <p className="text-sm text-gray-400">Your shortened URL:</p>
             <a
               href={shortUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-purple-400 hover:text-purple-300 truncate block"
+              className={`${linkColor} truncate block`}
             >
               {shortUrl}
             </a>
@@ -205,7 +212,7 @@ export function UrlShortenerForm({ onSuccess }: UrlShortenerFormProps) {
           <Button
             type="button"
             variant="outline"
-            className="border-gray-700 text-gray-200 hover:bg-gray-700"
+            className={buttonClasses.outline}
             onClick={copyToClipboard}
           >
             {copied ? <Check className="h-4 w-4 mr-2" /> : <Copy className="h-4 w-4 mr-2" />}
@@ -216,3 +223,4 @@ export function UrlShortenerForm({ onSuccess }: UrlShortenerFormProps) {
     </div>
   )
 }
+export default UrlShortenerForm

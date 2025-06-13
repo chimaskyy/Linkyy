@@ -1,69 +1,167 @@
+import type React from "react"
+import { useState } from "react"
+import { Button } from "../../components/ui/button"
+import { Input } from "../../components/ui/input"
+import { Label } from "../../components/ui/label"
+import toast from "react-hot-toast"
+import { supabase } from "../../lib/supabase"
+import { useAuth } from "../../contexts/auth-context"
+import { ExternalLink, ArrowRight } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 
-import { Button } from '../../components/ui/button'
-import { ChevronRight} from 'lucide-react'
-import { useAuth } from '../../contexts/auth-context'
-import { useNavigate } from 'react-router-dom'
-
-function LinkTree() {
-
+const SimpleLinkTreeForm = () => {
     const { user } = useAuth()
     const navigate = useNavigate()
-    const handleGetStarted = (path: string) => {
+    const [username, setUsername] = useState("")
+    const [title, setTitle] = useState("")
+    const [isLoading, setIsLoading] = useState(false)
+    const [treeUrl, setTreeUrl] = useState<string | null>(null)
+    const [createdTreeId, setCreatedTreeId] = useState<string | null>(null)
 
-        if (user) {
-            navigate(`/${path}`)
-        } else {
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+
+        if (!username) {
+            toast.error("Please enter a username")
+            return
+        }
+
+        if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+            toast.error("Username can only contain letters, numbers, and underscores")
+            return
+        }
+
+        if (!user) {
             navigate("/login")
+            return
+        }
+
+        setIsLoading(true)
+
+        try {
+            // Check if username is available
+            const { data: existingTree } = await supabase.from("link_trees").select("id").eq("username", username).single()
+
+            if (existingTree) {
+                toast.error("Username is already taken")
+                setIsLoading(false)
+                return
+            }
+
+            // Create the link tree
+            const { data, error } = await supabase
+                .from("link_trees")
+                .insert({
+                    user_id: user.id,
+                    username,
+                    title: title || "My Link Tree",
+                    bio: "",
+                    theme: "dark",
+                })
+                .select()
+                .single()
+
+            if (error) throw error
+
+            const baseUrl = window.location.origin
+            setTreeUrl(`${baseUrl}/tree/${username}`)
+            setCreatedTreeId(data.id) // Store the created tree ID
+
+            toast.success("Your link tree has been created")
+        } catch (error) {
+            console.error("Error creating link tree:", error)
+            toast.error(error instanceof Error ? error.message : "Failed to create link tree")
+        } finally {
+            setIsLoading(false)
         }
     }
-  return (
-        <div className="bg-gray-900/60 backdrop-blur-sm p-6 rounded-xl border border-gray-800 shadow-xl">
-            <div className="h-12 w-12 rounded-lg bg-purple-600/20 flex items-center justify-center text-purple-400 mb-4">
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-6 w-6"
-                >
-                    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                </svg>
-            </div>
-            <h3 className="text-xl font-bold mb-3">Link Tree</h3>
-            <p className="text-gray-400 mb-4">
-                Showcase all your important links in one place. Perfect for social media bios and creators.
-            </p>
-            <ul className="space-y-2 text-left mb-6">
-                <li className="flex items-center gap-2 text-sm text-gray-300">
-                    <ChevronRight className="h-5 w-5 text-purple-400 shrink-0 mt-0.5" />
-                    <span>Customizable themes and layouts</span>
-                </li>
-                <li className="flex items-center gap-2 text-sm text-gray-300">
-                    <ChevronRight className="h-5 w-5 text-purple-400 shrink-0 mt-0.5" />
-                    <span>Track clicks on each link in your tree</span>
-                </li>
-                <li className="flex items-center gap-2 text-sm text-gray-300">
-                    <ChevronRight className="h-5 w-5 text-purple-400 shrink-0 mt-0.5" />
-                    <span>Create an account to update your link tree anytime</span>
-                </li>
-            </ul>
-            <div className="text-sm text-purple-400 mb-4">
-                Create an account to save and edit your link tree anytime.
-            </div>
-            <Button
-                className="w-full bg-purple-600 hover:bg-purple-700 mt-4"
-                onClick={() => handleGetStarted("new-link-tree")}
-            >
-                Get Started
-            </Button>
+
+    const goToCustomize = () => {
+        if (createdTreeId) {
+            navigate(`/linktree/${createdTreeId}`)
+        } else {
+            toast.error("Tree ID not found")
+        }
+    }
+
+    return (
+        <div className="w-full">
+            <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="username" className="text-gray-700 font-medium">
+                            Choose your username
+                        </Label>
+                        <div className="relative">
+                            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                                <ExternalLink className="h-5 w-5" />
+                            </div>
+                            <Input
+                                id="username"
+                                type="text"
+                                placeholder="your-username"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                                className="pl-10 bg-gray-50 border-gray-300 text-gray-900 h-12 w-full focus:border-blue-500 focus:ring-blue-500"
+                            />
+                        </div>
+                        <p className="text-xs text-gray-500">Your link tree will be available at {window.location.origin}/tree/{username}</p>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="title" className="text-gray-700 font-medium">
+                            Display name
+                        </Label>
+                        <Input
+                            id="title"
+                            type="text"
+                            placeholder="Your Title or Brand eg 'Web Developer'"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            className="bg-gray-50 border-gray-300 text-gray-900 h-12 w-full focus:border-blue-500 focus:ring-blue-500"
+                        />
+                    </div>
+
+                    <Button
+                        type="submit"
+                        className="bg-purple-900 hover:opacity-80 text-white h-12 px-6 w-full rounded-lg font-medium"
+                        disabled={isLoading}
+                    >
+                        {isLoading ? "Creating..." : "Create your link tree"}
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                </div>
+            </form>
+
+            {treeUrl && (
+                <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-green-800">Your link tree is ready!</p>
+                            <a
+                                href={treeUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-green-600 hover:text-green-700 truncate block text-sm"
+                            >
+                                {treeUrl}
+                            </a>
+                        </div>
+                        <div className="flex gap-2">
+                            <Button
+                                type="button"
+                                size="sm"
+                                className="bg-green-600 hover:bg-green-700 text-white"
+                                onClick={goToCustomize}
+                            >
+                                Customize
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
 
-export default LinkTree
+export default SimpleLinkTreeForm

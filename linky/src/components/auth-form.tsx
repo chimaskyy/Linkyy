@@ -6,19 +6,23 @@ import { useNavigate } from "react-router-dom"
 import { Button } from "../components/ui/button"
 import { Input } from "../components/ui/input"
 import { Label } from "../components/ui/label"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs"
 import { AlertCircle } from "lucide-react"
 import { Alert, AlertDescription } from "../components/ui/alert"
 import { useAuth } from "../contexts/auth-context"
+import toast from "react-hot-toast"
+// import { GoogleLogo } from "../components/icons" // You'll need to create or import a Google logo component
 
 export function AuthForm() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  // const [isGoogleLoading, setIsGoogleLoading] = useState(false)
   const navigate = useNavigate()
-  const { signIn, signUp } = useAuth()
+  //import signInWithGoogle from when I need to implement Google Sign-In
+  const { signIn, signUp, } = useAuth()
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -33,11 +37,12 @@ export function AuthForm() {
         return
       }
 
-      // Show success message or redirect
+      toast.success("Account created successfully!.")
       navigate("/dashboard")
     } catch (err) {
       console.error("Error signing up:", err)
-      setError("An unexpected error occurred")
+      toast.error("An unexpected error occurred, please try again.")
+      setError("An unexpected error occurred, please try again.")
     } finally {
       setIsLoading(false)
     }
@@ -55,15 +60,34 @@ export function AuthForm() {
         setError(error.message)
         return
       }
-
+      toast.success("Signed in successfully!")
       navigate("/dashboard")
     } catch (err) {
       console.error("Error signing in:", err)
-      setError("An unexpected error occurred")
+      toast.error("Error occurred, please try again.")
     } finally {
       setIsLoading(false)
     }
   }
+
+  // const handleGoogleSignIn = async () => {
+  //   setIsGoogleLoading(true)
+  //   setError(null)
+
+  //   try {
+  //     const result = await signInWithGoogle()
+  //     if (result.error) throw result.error
+
+  //     navigate("/dashboard")
+  //   } catch (err) {
+  //     toast.error("Error signing in with Google, please try again.")
+  //     setError(err instanceof Error ? err.message : "An unexpected error occurred")
+  //     console.error("Error signing in with Google:", err)
+    
+  //   } finally {
+  //     setIsGoogleLoading(false)
+  //   }
+  // }
 
   return (
     <Card className="w-full max-w-md mx-auto bg-gray-900/60 backdrop-blur-sm border-gray-800">
@@ -90,6 +114,36 @@ export function AuthForm() {
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
+
+              {/* Google Sign-In Button */}
+              {/* <Button
+                type="button"
+                variant="outline"
+                className="w-full bg-white text-gray-800 hover:bg-gray-100 border-gray-300"
+                onClick={handleGoogleSignIn}
+                disabled={isGoogleLoading}
+              >
+                {isGoogleLoading ? (
+                  <span>Signing in with Google...</span>
+                ) : (
+                  <span className="flex items-center justify-center gap-2">
+                    <GoogleLogo className="w-5 h-5" />
+                    Sign in with Google
+                  </span>
+                )}
+              </Button> */}
+
+              {/* <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-gray-700" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="px-2 bg-gray-900/60 text-gray-400">
+                    Or continue with
+                  </span>
+                </div>
+              </div> */}
+
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -114,11 +168,11 @@ export function AuthForm() {
                 />
               </div>
             </CardContent>
-            <CardFooter>
+            <div className="px-6 pb-6">
               <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700" disabled={isLoading}>
                 {isLoading ? "Signing in..." : "Sign In"}
               </Button>
-            </CardFooter>
+            </div>
           </form>
         </TabsContent>
 
@@ -135,6 +189,36 @@ export function AuthForm() {
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
+
+              {/* Google Sign-In Button */}
+               {/* <Button
+                type="button"
+                variant="outline"
+                className="w-full bg-white text-gray-800 hover:bg-gray-100 border-gray-300"
+                onClick={handleGoogleSignIn}
+                disabled={isGoogleLoading}
+              >
+                {isGoogleLoading ? (
+                  <span>Signing up with Google...</span>
+                ) : (
+                  <span className="flex items-center justify-center gap-2">
+                    <GoogleLogo className="w-5 h-5" />
+                    Sign up with Google
+                  </span>
+                )}
+              </Button>  */}
+
+              {/* <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-gray-700" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="px-2 bg-gray-900/60 text-gray-400">
+                    Or continue with
+                  </span>
+                </div>
+              </div> */}
+
               <div className="space-y-2">
                 <Label htmlFor="register-email">Email</Label>
                 <Input
@@ -159,11 +243,11 @@ export function AuthForm() {
                 />
               </div>
             </CardContent>
-            <CardFooter>
+            <div className="px-6 pb-6">
               <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700" disabled={isLoading}>
                 {isLoading ? "Creating account..." : "Create Account"}
               </Button>
-            </CardFooter>
+            </div>
           </form>
         </TabsContent>
       </Tabs>

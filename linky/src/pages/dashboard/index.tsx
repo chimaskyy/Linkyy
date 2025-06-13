@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
-import { Link2, ExternalLink, BarChart, Clock, Key } from "lucide-react"
+import { Link2, ExternalLink, Clock, Key, QrCode } from "lucide-react"
 import { formatDate } from "../../lib/utils"
 import { supabase } from "../../lib/supabase"
 import { useAuth } from "../../contexts/auth-context"
@@ -14,7 +14,8 @@ export default function DashboardPage() {
   const [urlCount, setUrlCount] = useState(0)
   const [linkTreeCount, setLinkTreeCount] = useState(0)
   const [passwordCount, setPasswordCount] = useState(0)
-  const [totalClickCount, setTotalClickCount] = useState(0)
+  const [qrCodeCount, setQrCodeCount] = useState(0)
+  // const [totalClickCount, setTotalClickCount] = useState(0)
   const [recentUrls, setRecentUrls] = useState<unknown[]>([])
   const [recentLinkTrees, setRecentLinkTrees] = useState<unknown[]>([])
   const [loading, setLoading] = useState(true)
@@ -48,11 +49,19 @@ export default function DashboardPage() {
 
         setPasswordCount(passwordCountData || 0)
 
-        // Get total clicks
-        const { data: totalClicks } = await supabase.from("urls").select("clicks").eq("user_id", user.id)
+        // get qr code count
+        const { count: qrCodeCountData } = await supabase
+          .from("qr_codes")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", user.id)
 
-        const totalClicksCount = totalClicks?.reduce((sum, url) => sum + (url.clicks || 0), 0) || 0
-        setTotalClickCount(totalClicksCount)
+        setQrCodeCount(qrCodeCountData || 0)
+
+        // Get total clicks
+        // const { data: totalClicks } = await supabase.from("urls").select("clicks").eq("user_id", user.id)
+
+        // const totalClicksCount = totalClicks?.reduce((sum, url) => sum + (url.clicks || 0), 0) || 0
+        // setTotalClickCount(totalClicksCount)
 
         // Get recent URLs
         const { data: recentUrlsData } = await supabase
@@ -140,7 +149,7 @@ export default function DashboardPage() {
         <p className="text-xs text-gray-400">{tree.title || "No title"}</p>
       </div>
       <Link
-        to={`t/${tree.username}`}
+        to={`/tree/${tree.username}`}
         target="_blank"
         rel="noopener noreferrer"
         className="text-sm text-purple-400 hover:text-purple-300 flex items-center"
@@ -174,15 +183,18 @@ export default function DashboardPage() {
             description="Saved Passwords"
           />
           <StatsCard
+            icon={<QrCode className="h-5 w-5 mr-2 text-purple-400" />}
+            
+            value={qrCodeCount || 0}
+            description="Generated QR Codes"
+          />
+          {/* <StatsCard
             icon={<BarChart className="h-5 w-5 mr-2 text-purple-400" />}
             
             value={totalClickCount}
             description="Total Clicks"
-          />
+          /> */}
         </div>
-
-        {/* <CreationTabs tabs={creationTabs} defaultValue="url" /> */}
-
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <RecentItemsCard
             title="Recent URLs"

@@ -1,127 +1,248 @@
-import Shorten from "./Shorten"
-import Password from "./Password"
-import LinkTree from "./LinkTree"
+import { useState, useCallback, useMemo, lazy, Suspense, useEffect } from "react"
+import { Link } from "react-router-dom"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs"
+import { useAuth } from "../../contexts/auth-context"
+import { Link2, Key, ExternalLink, QrCode } from "lucide-react"
 import Header from "../../components/Header"
-// import { Button } from "../../components/ui/button"
+import StarsBackground from "./Star"
+// Lazy load heavy components
+const UrlShortenerForm = lazy(() => import("../../components/url/UrlShortenerForm"))
+const PasswordGeneratorForm = lazy(() => import("../../components/password/PasswordGenerator"))
+const SimpleLinkTreeForm = lazy(() => import("./LinkTree"))
+const QRCodeGeneratorForm = lazy(() => import("../qr-code/QrCodeForm"))
+
+interface TabConfig {
+    value: string
+    icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
+    label: string
+    title: string
+    description: string
+    requiresAuth?: boolean // Add this property to mark tabs that require authentication
+}
+
+interface FormProps {
+    [key: string]: unknown
+}
+
+type TabValue = string
+
+interface TabValueChangeHandler {
+    (value: string): void
+}
+
+// Loading component for suspense fallback
+const FormLoader = () => (
+    <div className="flex items-center justify-center py-8" role="status" aria-label="Loading form">
+        <div className="animate-pulse flex flex-col items-center space-y-4">
+            <div className="h-8 bg-gray-200 rounded w-48"></div>
+            <div className="h-4 bg-gray-200 rounded w-64"></div>
+            <div className="h-12 bg-gray-200 rounded w-full max-w-md"></div>
+            <div className="h-10 bg-gray-200 rounded w-24"></div>
+        </div>
+        <span className="sr-only">Loading form content</span>
+    </div>
+)
+
+const Logo = ({ className = "" }) => (
+    <div className={`flex items-center space-x-2 ${className}`}>
+        <div className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center" aria-hidden="true">
+            <div className="h-6 w-6 rounded-full bg-purple-600"></div>
+        </div>
+        <span className="text-xl font-bold">Linky</span>
+    </div>
+)
+
+// Tab configuration 
+const TAB_CONFIG: TabConfig[] = [
+    {
+        value: "shorten",
+        icon: Link2,
+        label: "Short link",
+        title: "Shorten a long link",
+        description: "Create a shorter and easy to remember link.",
+    },
+    {
+        value: "password",
+        icon: Key,
+        label: "Password",
+        title: "Generate secure password",
+        description: "Create strong, unique passwords for your accounts.",
+    },
+    {
+        value: "linktree",
+        icon: ExternalLink,
+        label: "Link Tree",
+        title: "Create your link tree",
+        description: "Showcase all your important links in one place.",
+        requiresAuth: true, 
+    },
+    {
+        value: "qr-code",
+        icon: QrCode,
+        label: "QR Code",
+        title: "Generate QR Code",
+        description: "Create a QR code for any link or text.",
+    },
+]
+
 export default function HomePage() {
+    const { user } = useAuth()
+    const [activeTab, setActiveTab] = useState("shorten")
+
+    // Filter tabs based on authentication status
+    const availableTabs = useMemo(() => {
+        return TAB_CONFIG.filter(tab => !tab.requiresAuth || user)
+    }, [user])
+
+    // Reset active tab if it's no longer available (e.g., user logs out while on Link Tree tab)
+    useEffect(() => {
+        const isActiveTabAvailable = availableTabs.some(tab => tab.value === activeTab)
+        if (!isActiveTabAvailable) {
+            setActiveTab("shorten") // Default to first available tab
+        }
+    }, [availableTabs, activeTab])
+
+    const handleTabChange: TabValueChangeHandler = useCallback((value) => {
+        setActiveTab(value)
+    }, [])
+
+    // const currentTabConfig = useMemo(() =>
+    //     availableTabs.find(tab => tab.value === activeTab)
+    //     , [availableTabs, activeTab])
+
+    const renderTabContent = useCallback((tabValue: TabValue) => {
+        const config: TabConfig | undefined = availableTabs.find(tab => tab.value === tabValue)
+        if (!config) return null
+
+        let FormComponent: React.ComponentType<FormProps>
+        let formProps: FormProps = {}
+
+        switch (tabValue) {
+            case "shorten":
+                FormComponent = UrlShortenerForm
+                formProps = {
+                    theme: "light",
+                    buttonVariant: "purple",
+                    requireTitle: true,
+                }
+                break
+            case "password":
+                FormComponent = PasswordGeneratorForm
+                break
+            case "linktree":
+                FormComponent = SimpleLinkTreeForm
+                break
+            case "qr-code":
+                FormComponent = QRCodeGeneratorForm
+                formProps = { theme: "light" }
+                break
+            default:
+                return null
+        }
+
+        return (
+            <TabsContent value={tabValue} className="mt-0">
+                <div className="space-y-6">
+                    <div className="text-center">
+                        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                            {config.title}
+                        </h2>
+                        <p className="text-gray-600">
+                            {config.description}
+                        </p>
+                    </div>
+                    <Suspense fallback={<FormLoader />}>
+                        <FormComponent {...formProps} />
+                    </Suspense>
+                </div>
+            </TabsContent>
+        )
+    }, [availableTabs])
 
     return (
         <div className="min-h-screen bg-black bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gray-900 via-gray-950 to-black text-white overflow-hidden relative">
-            {/* Stars background effect */}
-            <div className="absolute inset-0 z-0">
-                {Array.from({ length: 100 }).map((_, i) => (
-                    <div
-                        key={i}
-                        className="absolute rounded-full bg-white"
-                        style={{
-                            width: Math.random() * 2 + "px",
-                            height: Math.random() * 2 + "px",
-                            top: Math.random() * 100 + "%",
-                            left: Math.random() * 100 + "%",
-                            opacity: Math.random() * 0.5 + 0.3,
-                        }}
-                    />
-                ))}
-            </div>
-
+            <StarsBackground />
             {/* Navigation */}
+
             <Header />
 
             {/* Hero Section */}
-            <main className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 pt-16 md:pt-24 lg:pt-32 text-center">
-                <div className="max-w-3xl mx-auto">
-                    <p className="text-xs sm:text-sm tracking-widest text-purple-400 mb-4">YOUR LINK MANAGEMENT SOLUTION</p>
-                    <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 leading-tight  font-['Poppins']">
-                        Simplify your online presence
-                    </h1>
-                    <p className="text-gray-400 text-lg mb-10 max-w-2xl mx-auto">
-                        Linky is your all-in-one tool for shortening URLs, creating beautiful link trees, and generating secure passwords.
-                        Manage your links effortlessly and enhance your online presence.
-                    </p>
-                </div>
-
-                {/* Features Section */}
-                <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                    {/* URL Shortener Feature */}
-                    <Shorten />
-
-                    {/* Link Tree Feature */}
-                    <LinkTree />
-
-                    {/* Password Generator Feature */}
-                    <Password />
-                </div>
-
-{/* how it works */}
-                <div className="mt-32 max-w-6xl mx-auto">
-                    <div className="text-center mb-12">
-                        <h2 className="text-3xl font-bold mb-4">How It Works</h2>
-                        <p className="text-gray-400 max-w-2xl mx-auto">
-                            Linky makes it simple to manage your online presence with powerful yet easy-to-use tools.
+            <main id="main-content" className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 pt-16 md:pt-24 lg:pt-32">
+                <div className="max-w-4xl mx-auto">
+                    {/* Hero Text */}
+                    <section className="text-center mb-16">
+                        <p className="text-xs sm:text-sm tracking-widest text-purple-400 mb-4 uppercase" role="doc-subtitle">
+                            Your link management solution
                         </p>
-                    </div>
+                        <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 leading-tight">
+                            Simplify your online presence
+                        </h1>
+                        <p className="text-gray-400 text-sm md:text-lg mb-10 max-w-2xl mx-auto">
+                            Linky is your all-in-one tool for shortening URLs, creating beautiful link trees, and generating secure
+                            passwords. Manage your links effortlessly and enhance your online presence.
+                        </p>
+                    </section>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <div className="bg-gray-900/60 backdrop-blur-sm p-6 rounded-xl border border-gray-800">
-                            <div className="text-purple-400 mb-4">1</div>
-                            <h3 className="text-xl font-bold mb-3">Create an account</h3>
-                            <p className="text-gray-400">
-                                Sign up in seconds to access all features and save your work.
-                            </p>
-                        </div>
-                        <div className="bg-gray-900/60 backdrop-blur-sm p-6 rounded-xl border border-gray-800">
-                            <div className="text-purple-400 mb-4">2</div>
-                            <h3 className="text-xl font-bold mb-3">Choose your tool</h3>
-                            <p className="text-gray-400">
-                                Select between URL shortening, creating a beautiful link tree, or generating secure passwords.
-                            </p>
-                        </div>
-                        <div className="bg-gray-900/60 backdrop-blur-sm p-6 rounded-xl border border-gray-800">
-                            <div className="text-purple-400 mb-4">3</div>
-                            <h3 className="text-xl font-bold mb-3">Customize and share</h3>
-                            <p className="text-gray-400">
-                                Personalize your links and share them with the world. Track clicks and manage your links effortlessly.
-                            </p>
-                        </div>
-                        <div className="bg-gray-900/60 backdrop-blur-sm p-6 rounded-xl border border-gray-800">
-                            <div className="text-purple-400 mb-4">4</div>
-                            <h3 className="text-xl font-bold mb-3">Track and manage</h3>
-                            <p className="text-gray-400">
-                                Monitor the performance of your links and make adjustments as needed.
-                            </p>
-                        </div>
-                        <div className="bg-gray-900/60 backdrop-blur-sm p-6 rounded-xl border border-gray-800">
-                            <div className="text-purple-400 mb-4">5</div>
-                            <h3 className="text-xl font-bold mb-3">Stay secured</h3>
-                            <p className="text-gray-400">
-                                Use our password generator to create strong, unique passwords for all your accounts.
-                            </p>
-                            
-                        </div>
-                        {/* <div className="bg-gray-900/60 backdrop-blur-sm p-6 rounded-xl border border-gray-800">
-                            <div className="text-purple-400 mb-4">6</div>
-                            <h3 className="text-xl font-bold mb-3">Enjoy seamless updates</h3>
-                            <p className="text-gray-400">
-                                Easily update your link tree or URLs anytime, ensuring your audience always has the latest information.
-                            </p>
-                        </div> */}
-                    </div>
+                    {/* Main Tabs Interface */}
+                    <section className="bg-white rounded-3xl p-8 shadow-2xl max-w-3xl mx-auto" aria-label="Link management tools">
+                        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+                            {/* Tab Navigation */}
+                            <div className="flex justify-center mb-8">
+                                <TabsList
+                                    className="w-full max-w-md md:max-w-xl flex flex-row gap-4 bg-gray-100 p-1 rounded-xl"
+                                    aria-label="Tool selection"
+                                >
+                                    {availableTabs.map(({ value, icon: Icon, label }) => (
+                                        <TabsTrigger
+                                            key={value}
+                                            value={value}
+                                            className="flex items-center gap-2 data-[state=active]:bg-purple-900 data-[state=active]:shadow-sm rounded-lg py-1 md:py-2 px-4 text-gray-700 data-[state=active]:text-white focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+                                            aria-label={`${label} tool`}
+                                        >
+                                            <Icon className="h-4 w-4" aria-hidden="true" />
+                                            <span className="hidden sm:inline">{label}</span>
+                                        </TabsTrigger>
+                                    ))}
+                                </TabsList>
+                            </div>
+
+                            {/* Tab Content */}
+                            {availableTabs.map(({ value }) => renderTabContent(value))}
+                        </Tabs>
+
+                        {/* Login prompt for non-authenticated users */}
+                        {!user && (
+                            <aside className="mt-8 p-4 bg-purple-50 rounded-lg border border-purple-200" role="complementary">
+                                <p className="text-center text-purple-800">
+                                    <Link
+                                        to="/login"
+                                        className="font-bold underline focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 rounded"
+                                    >
+                                        Sign in
+                                    </Link>{" "}
+                                    to save your work and access all features including Link Tree, or{" "}
+                                    <Link
+                                        to="/register"
+                                        className="font-bold underline focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 rounded"
+                                    >
+                                        Create an account
+                                    </Link>
+                                    .
+                                </p>
+                            </aside>
+                        )}
+                    </section>
                 </div>
             </main>
 
             {/* Footer */}
-            <footer className="relative z-10 border-t border-gray-800 mt-32 py-12">
-                <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center">
+            <footer className="relative z-10 border-t border-gray-800 mt-32 py-12" role="contentinfo">
+                <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex flex-col md:flex-row justify-between items-center">
-                        <div className="flex items-center space-x-2 mb-4 md:mb-0">
-                            <div className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center">
-                                <div className="h-6 w-6 rounded-full bg-purple-600"></div>
-                            </div>
-                            <span className="text-xl font-bold">Linky</span>
+                        <Logo />
+                        <div className="mt-8 md:mt-0 text-center md:text-left text-gray-500 text-sm">
+                            <p>© {new Date().getFullYear()} Linky. All rights reserved.</p>
                         </div>
-                    </div>
-                    <div className="mt-8 text-center md:text-left text-gray-500 text-sm">
-                        © {new Date().getFullYear()} Linky. All rights reserved.
                     </div>
                 </div>
             </footer>

@@ -2,13 +2,13 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../components/ui/card"
 import { Button } from "../../components/ui/button"
 import { ExternalLink, Trash2, Clock, Pencil } from "lucide-react"
-import { useToast } from "../../hooks/use-toast"
 import { supabase } from "../../lib/supabase"
 import { useAuth } from "../../contexts/auth-context"
 import { formatDate } from "../../lib/utils"
 import DashboardLayout from "../../components/dashboard-layout"
 import { Link } from "react-router-dom"
-
+import toast from "react-hot-toast"
+import { LoadingSpinner } from "../../components/LoadingSpinner"
 interface LinkTree {
   id: string
   user_id: string
@@ -21,7 +21,6 @@ interface LinkTree {
 }
 
 export default function LinkTreesPage() {
-  const { toast } = useToast()
   const { user } = useAuth()
   const [linkTrees, setLinkTrees] = useState<LinkTree[]>([])
   const [loading, setLoading] = useState(true)
@@ -44,18 +43,14 @@ export default function LinkTreesPage() {
         setLinkTrees(data || [])
       } catch (error) {
         console.error("Error fetching link trees:", error)
-        toast({
-          title: "Error",
-          description: "Failed to load link trees",
-          variant: "destructive",
-        })
+        toast.error("Failed to load link trees")
       } finally {
         setLoading(false)
       }
     }
 
     fetchLinkTrees()
-  }, [user, toast])
+  }, [user])
 
   const deleteLinkTree = async (id: string) => {
     if (!user) return
@@ -65,9 +60,9 @@ export default function LinkTreesPage() {
 
       // First delete all links associated with this link tree
       const { error: linksError } = await supabase
-        .from("links")
+        .from("tree_links")
         .delete()
-        .eq("link_tree_id", id)
+        .eq("id", id)
 
       if (linksError) throw linksError
 
@@ -81,17 +76,10 @@ export default function LinkTreesPage() {
       if (error) throw error
 
       setLinkTrees(prev => prev.filter(tree => tree.id !== id))
-      toast({
-        title: "Link tree deleted",
-        description: "Link tree has been deleted successfully",
-      })
+      toast.success("Link tree has been deleted successfully")
     } catch (error) {
-      console.error("Error deleting link tree:", error)
-      toast({
-        title: "Error",
-        description: "Failed to delete link tree",
-        variant: "destructive",
-      })
+      console.log("Error deleting link tree:", error)
+      toast.error("Failed to delete link tree")
     } finally {
       setDeletingId(null)
     }
@@ -118,7 +106,7 @@ export default function LinkTreesPage() {
                 className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500"
                 role="status"
               >
-                <span className="sr-only">Loading...</span>
+                <LoadingSpinner />
               </div>
             </div>
           ) : linkTrees.length > 0 ? (
@@ -190,7 +178,7 @@ export default function LinkTreesPage() {
                       className="border-gray-700 text-gray-200 hover:bg-gray-800 flex-1"
                     >
                       <Link
-                        to={`/t/${tree.username}`}
+                        to={`/tree/${tree.username}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label={`View ${tree.title}`}

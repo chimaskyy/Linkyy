@@ -4,7 +4,7 @@ import type React from "react"
 import { useState } from "react"
 import { Link, useNavigate, useLocation } from "react-router-dom"
 import { Button } from "../components/ui/button"
-import { Link2, ExternalLink, LayoutDashboard, LogOut, User, Key, Menu, X } from "lucide-react"
+import { Link2, ExternalLink, LayoutDashboard, LogOut, User, Key, Menu, X, QrCode } from "lucide-react"
 import { useAuth } from "../contexts/auth-context"
 
 interface DashboardLayoutProps {
@@ -42,7 +42,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <div className="flex items-center justify-between">
             <Link to="/" className="flex items-center space-x-2">
               <div className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center">
-                <div className="h-6 w-6 rounded-full bg-purple-600"></div>
+                <div className="h-6 w-6 rounded-full bg-purple-900"></div>
               </div>
               <span className="text-xl font-bold">Linky</span>
             </Link>
@@ -69,7 +69,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <div className="flex items-center mb-8 hidden md:flex">
             <Link to="/" className="flex items-center space-x-2">
               <div className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center">
-                <div className="h-6 w-6 rounded-full bg-purple-600"></div>
+                <div className="h-6 w-6 rounded-full bg-purple-900"></div>
               </div>
               <span className="text-xl font-bold">Linky</span>
             </Link>
@@ -78,7 +78,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <nav className="space-y-2">
             <Link
               to="/dashboard"
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${isActive("/dashboard") ? "bg-purple-600 text-white" : "hover:bg-gray-800 text-gray-300 hover:text-white"
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${isActive("/dashboard") ? "bg-purple-900 text-white" : "hover:bg-gray-800 text-gray-300 hover:text-white"
                 }`}
               onClick={closeMobileMenu}
             >
@@ -88,7 +88,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             <Link
               to="/urls"
               className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${isActive("/dashboard/urls")
-                  ? "bg-purple-600 text-white"
+                  ? "bg-purple-900 text-white"
                   : "hover:bg-gray-800 text-gray-300 hover:text-white"
                 }`}
               onClick={closeMobileMenu}
@@ -99,7 +99,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             <Link
               to="/linktrees"
               className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${isActive("/dashboard/linktrees")
-                  ? "bg-purple-600 text-white"
+                  ? "bg-purple-900 text-white"
                   : "hover:bg-gray-800 text-gray-300 hover:text-white"
                 }`}
               onClick={closeMobileMenu}
@@ -110,7 +110,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             <Link
               to="/passwords"
               className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${isActive("/dashboard/passwords")
-                  ? "bg-purple-600 text-white"
+                  ? "bg-purple-900 text-white"
                   : "hover:bg-gray-800 text-gray-300 hover:text-white"
                 }`}
               onClick={closeMobileMenu}
@@ -119,9 +119,20 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <span>My Passwords</span>
             </Link>
             <Link
+              to="/qr-codes"
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${isActive("/dashboard/passwords")
+                ? "bg-purple-900 text-white"
+                : "hover:bg-gray-800 text-gray-300 hover:text-white"
+                }`}
+              onClick={closeMobileMenu}
+            >
+              <QrCode className="h-5 w-5" />
+              <span>My Qr Codes</span>
+            </Link>
+            <Link
               to="/profile"
               className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${isActive("/dashboard/profile")
-                  ? "bg-purple-600 text-white"
+                  ? "bg-purple-900 text-white"
                   : "hover:bg-gray-800 text-gray-300 hover:text-white"
                 }`}
               onClick={closeMobileMenu}

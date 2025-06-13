@@ -23,5 +23,9 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src"]
+  "include": [
+    "src",
+    "!src/hooks/use-auth.tsx",
+    "!src/pages/home/Password.tsx"
+  ]
 }

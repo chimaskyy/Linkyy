@@ -10,7 +10,7 @@ import { supabase } from "../../lib/supabase"
 import { useAuth } from "../../contexts/auth-context"
 import { formatDate } from "../../lib/utils"
 import { decryptPassword, type PasswordEntry } from "../../lib/password-utils"
-import { PasswordGeneratorForm } from "../../components/password-generator-form"
+import  PasswordGeneratorForm  from "../../components/password/PasswordGenerator"
 import DashboardLayout from "../../components/dashboard-layout"
 
 export default function PasswordsPage() {
@@ -113,7 +113,7 @@ export default function PasswordsPage() {
                         <CardDescription className="text-center">Create a strong, customised, secure password</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <PasswordGeneratorForm />
+                        <PasswordGeneratorForm theme="dark" />
                     </CardContent>
                 </Card>
 
@@ -164,7 +164,7 @@ export default function PasswordsPage() {
                                             </div>
                                         </div>
 
-                                        <div className="flex justify-between items-center">
+                                        <div className="flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-2 justify-between items-center">
                                             <div className="flex space-x-2 text-xs">
                                                 {password.options.includeUppercase && (
                                                     <span className="bg-purple-600/20 text-purple-400 px-2 py-1 rounded">A-Z</span>
@@ -187,10 +187,10 @@ export default function PasswordsPage() {
                                                 variant="outline"
                                                 size="sm"
                                                 onClick={() => deletePassword(password.id)}
-                                                className="border-gray-700 hover:bg-gray-700 hover:text-white"
+                                                className="ml-2 border-gray-700 hover:bg-gray-700 hover:text-white"
                                             >
                                                 <Trash2 className="h-4 w-4 mr-1" />
-                                                Delete
+                                               Delete
                                             </Button>
                                         </div>
                                     </div>

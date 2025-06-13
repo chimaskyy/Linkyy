@@ -8,7 +8,7 @@ import { useToast } from "../../hooks/use-toast"
 import { supabase } from "../../lib/supabase"
 import { useAuth } from "../../contexts/auth-context"
 import { formatDate } from "../../lib/utils"
-import { UrlShortenerForm } from "../../components/url-shortener-form"
+import  UrlShortenerForm  from "../../components/url/UrlShortenerForm"
 import DashboardLayout from "../../components/dashboard-layout"
 
 interface Url {
@@ -89,9 +89,9 @@ export default function UrlsPage() {
         }
     }
 
-    const handleUrlCreated = (newUrl: Url) => {
-        setUrls((prev) => [newUrl, ...prev])
-    }
+    // const handleUrlCreated = (newUrl: Url) => {
+    //     setUrls((prev) => [newUrl, ...prev])
+    // }
 
     return (
         <DashboardLayout>
@@ -102,7 +102,11 @@ export default function UrlsPage() {
                         <CardDescription>Shorten and track your links</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <UrlShortenerForm onSuccess={handleUrlCreated} />
+                        <UrlShortenerForm
+                            theme="dark"
+                            requireTitle={true}
+                            onSuccess={(newUrl) => console.log('New URL:', newUrl)}
+                        />
                     </CardContent>
                 </Card>
 

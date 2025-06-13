@@ -77,7 +77,7 @@ const LinkTreeForm = () => {
                         description: "Link tree not found",
                         variant: "destructive",
                     })
-                    navigate("/dashboard/linktrees")
+                    navigate("/linktrees")
                     return
                 }
 
@@ -105,7 +105,7 @@ const LinkTreeForm = () => {
                     description: "Failed to load link tree",
                     variant: "destructive",
                 })
-                navigate("/dashboard/linktrees")
+                navigate("/linktrees")
             } finally {
                 setLoading(false)
             }
@@ -219,7 +219,7 @@ const LinkTreeForm = () => {
 
                 linkTreeId = data.id
                 setLinkTree(data)
-                setTreeUrl(`${window.location.origin}/t/${username}`)
+                setTreeUrl(`${window.location.origin}/tree/${username}`)
             } else {
                 const { error } = await supabase
                     .from("link_trees")
@@ -263,9 +263,9 @@ const LinkTreeForm = () => {
                 description: `Link tree has been ${id ? "updated" : "created"}`,
             })
 
-            if (!id) {
-                navigate(`/dashboard/linktrees/${linkTreeId}`)
-            }
+            // if (!id) {
+            //     navigate(`/linktrees/${linkTreeId}`)
+            // }
         } catch (error) {
             console.error("Error saving link tree:", error)
             toast({

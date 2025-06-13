@@ -3,7 +3,7 @@
 import type React from "react"
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
 import { AuthProvider } from "./contexts/auth-context"
-import { ToastProvider } from "./components/ui/toast"
+import { Toaster } from "react-hot-toast"
 import HomePage from "./pages/home/Home"
 import LoginPage from "./pages/login"
 import DashboardPage from "./pages/dashboard"
@@ -14,7 +14,9 @@ import PasswordsPage from "./pages/dashboard/passwords"
 import ShortUrlRedirect from "./pages/short-url-redirect"
 import LinkTreePage from "./pages/link-tree"
 import LinkTreeForm from "./pages/link-tree/CreateTree"
+import CreateQrCode from "./pages/qr-code/CreateQrCode"
 import { useAuth } from "./contexts/auth-context"
+import QRCodesPage from "./pages/dashboard/QrCode"
 // import EditLinkTreePage from "./pages/dashboard/editLinkTree"
 // import NewLinkTreePage from "./components/link-tree-form"
 
@@ -46,7 +48,7 @@ function AppRoutes() {
       <Route path="/register" element={<LoginPage />} />
       <Route path="/new-link-tree" element={<LinkTreeForm />} />
       <Route path="/:code" element={<ShortUrlRedirect />} />
-      <Route path="/t/:username" element={<LinkTreePage />} />
+      <Route path="/tree/:username" element={<LinkTreePage />} />
 
       {/* Protected routes */}
       <Route
@@ -73,6 +75,23 @@ function AppRoutes() {
            </ProtectedRoute>
         }
       />
+      <Route
+        path="/qr-codes"
+        element={
+          <ProtectedRoute>
+            <QRCodesPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/qr-code-generator"
+        element={
+          <ProtectedRoute>
+            <CreateQrCode />
+          </ProtectedRoute>
+        }
+      />
+
       <Route
         path="/linktree/:id"
         element={
@@ -104,10 +123,9 @@ function AppRoutes() {
 function App() {
   return (
     <Router>
+      <Toaster position="top-right" reverseOrder={false} />
       <AuthProvider>
-        <ToastProvider>
           <AppRoutes />
-        </ToastProvider>
       </AuthProvider>
     </Router>
   )
