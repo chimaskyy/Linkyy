@@ -33,7 +33,7 @@ export function SocialLinks({ links, onAddLink, onUpdateLink, onRemoveLink, onMo
                 <div className="space-y-4">
                     {links.map((link, index) => (
                         <LinkItem
-                            key={link.id || `link-${index}`} // Use stable ID instead of just index
+                            key={link.id || `link-${index}`} 
                             link={link}
                             index={index}
                             onUpdate={onUpdateLink}

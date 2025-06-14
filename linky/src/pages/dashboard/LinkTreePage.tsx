@@ -178,7 +178,7 @@ export default function LinkTreesPage() {
                       className="border-gray-700 text-gray-200 hover:bg-gray-800 flex-1"
                     >
                       <Link
-                        to={`/tree/${tree.username}`}
+                        to={`/t/${tree.username}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label={`View ${tree.title}`}

@@ -145,7 +145,7 @@ const LinkTreeFormState = () => {
 
                 linkTreeId = data.id
                 setLinkTree(data)
-                setTreeUrl(`${window.location.origin}/tree/${username}`)
+                setTreeUrl(`${window.location.origin}/t/${username}`)
             } else {
                 const { error } = await supabase
                     .from("link_trees")

@@ -149,7 +149,7 @@ export default function DashboardPage() {
         <p className="text-xs text-gray-400">{tree.title || "No title"}</p>
       </div>
       <Link
-        to={`/tree/${tree.username}`}
+        to={`/t/${tree.username}`}
         target="_blank"
         rel="noopener noreferrer"
         className="text-sm text-purple-400 hover:text-purple-300 flex items-center"

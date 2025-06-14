@@ -48,7 +48,7 @@ function AppRoutes() {
       <Route path="/register" element={<LoginPage />} />
       <Route path="/new-link-tree" element={<LinkTreeForm />} />
       <Route path="/:code" element={<ShortUrlRedirect />} />
-      <Route path="/tree/:username" element={<LinkTreePage />} />
+      <Route path="/t/:username" element={<LinkTreePage />} />
 
       {/* Protected routes */}
       <Route

@@ -170,7 +170,7 @@ const LinkTreeForm = () => {
             setTheme(linkTreeData.theme || "dark");
             setUsername(linkTreeData.username || "");
             setAvatarUrl(linkTreeData.avatar_url);
-            setTreeUrl(`${window.location.origin}/tree/${linkTreeData.username}`);
+            setTreeUrl(`${window.location.origin}/t/${linkTreeData.username}`);
 
             const { data: linksData, error: linksError } = await supabase
                 .from("tree_links")
@@ -299,7 +299,7 @@ const LinkTreeForm = () => {
 
                 linkTreeId = data.id
                 setLinkTree(data)
-                setTreeUrl(`${window.location.origin}/tree/${username}`)
+                setTreeUrl(`${window.location.origin}/t/${username}`)
             } else {
                 const { error } = await supabase
                     .from("link_trees")

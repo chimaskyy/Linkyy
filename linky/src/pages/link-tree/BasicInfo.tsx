@@ -44,7 +44,7 @@ export function BasicInfoForm({
                         />
                     </div>
                     <p className="text-xs text-gray-400">
-                        Your link tree will be available at {window.location.origin}/tree/{username}
+                        Your link tree will be available at {window.location.origin}/t/{username}
                     </p>
                 </div>
 

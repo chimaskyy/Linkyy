@@ -64,7 +64,7 @@ const SimpleLinkTreeForm = () => {
             if (error) throw error
 
             const baseUrl = window.location.origin
-            setTreeUrl(`${baseUrl}/tree/${username}`)
+            setTreeUrl(`${baseUrl}/t/${username}`)
             setCreatedTreeId(data.id) // Store the created tree ID
 
             toast.success("Your link tree has been created")
@@ -105,7 +105,7 @@ const SimpleLinkTreeForm = () => {
                                 className="pl-10 bg-gray-50 border-gray-300 text-gray-900 h-12 w-full focus:border-purple-500 focus:ring-purple-500"
                             />
                         </div>
-                        <p className="text-xs text-gray-500">Your link tree will be available at {window.location.origin}/tree/{username}</p>
+                        <p className="text-xs text-gray-500">Your link tree will be available at {window.location.origin}/t/{username}</p>
                     </div>
 
                     <div className="space-y-2">
