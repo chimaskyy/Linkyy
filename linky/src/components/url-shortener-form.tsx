@@ -47,7 +47,7 @@ const UrlShortenerForm = ({
     ? "bg-gray-800/50 border-gray-700"
     : "bg-gray-100 border-gray-300"
 
-  const linkColor = theme === 'dark' ? "text-purple-400 hover:text-purple-300" : "text-blue-400 hover:text-blue-300"
+  const linkColor = theme === 'dark' ? "text-purple-400 hover:text-purple-300" : "text-purple-900 hover:opacity-80"
 
   const buttonClasses = {
     default: "",

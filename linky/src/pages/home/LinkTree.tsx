@@ -102,7 +102,7 @@ const SimpleLinkTreeForm = () => {
                                 placeholder="your-username"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
-                                className="pl-10 bg-gray-50 border-gray-300 text-gray-900 h-12 w-full focus:border-blue-500 focus:ring-blue-500"
+                                className="pl-10 bg-gray-50 border-gray-300 text-gray-900 h-12 w-full focus:border-purple-500 focus:ring-purple-500"
                             />
                         </div>
                         <p className="text-xs text-gray-500">Your link tree will be available at {window.location.origin}/tree/{username}</p>
@@ -118,7 +118,7 @@ const SimpleLinkTreeForm = () => {
                             placeholder="Your Title or Brand eg 'Web Developer'"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
-                            className="bg-gray-50 border-gray-300 text-gray-900 h-12 w-full focus:border-blue-500 focus:ring-blue-500"
+                            className="bg-gray-50 border-gray-300 text-gray-900 h-12 w-full focus:border-purple-500 focus:ring-purple-500"
                         />
                     </div>
 

@@ -45,7 +45,7 @@ export const PasswordResult = ({
     const getStrengthColor = () => {
         if (passwordStrength < 30) return "bg-red-500"
         if (passwordStrength < 60) return "bg-yellow-500"
-        if (passwordStrength < 80) return "bg-blue-500"
+        if (passwordStrength < 80) return "bg-purple-500"
         return "bg-green-500"
     }
 

@@ -223,7 +223,7 @@ const QRCodeGeneratorForm = () => {
 
                 <Button
                     type="submit"
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white h-12"
+                    className="w-full bg-purple-600 hover:opacity-80 text-white h-12"
                     disabled={loading}
                 >
                     {loading ? (

@@ -25,8 +25,8 @@ export const PasswordOptionsForm = ({
 
     const labelClasses = theme === 'dark' ? 'text-gray-200' : 'text-gray-700'
     const checkboxClasses = theme === 'dark'
-        ? "bg-gray-800/50 border-gray-700 focus:ring-purple-500"
-        : "bg-gray-50 border-gray-300 focus:ring-blue-500"
+        ? "bg-gray-800/50 border-gray-700 focus:border-purple-500 focus:ring-purple-500"
+        : "bg-gray-50 border-gray-300 focus:border-purple-500 focus:ring-purple-500"
 
     return (
         <>
